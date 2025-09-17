@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3줄 성장 노트</title>
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="매일 3줄로 성장을 기록하고 분석하는 앱">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIjPso4Qg7ISx7J6l64W47ZuEIiwKICAic2hvcnRfbmFtZSI6ICLshLHsnqXrhbjthEQiLAogICJkZXNjcmlwdGlvbiI6ICLrp6TsnbwgM+ykhOuhnCDshLHsnqXsnYQg6riw66GdO2VhZCDrtoTshJ3tlZjripQg7JWxIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjlmYWZiIiwKICAidGhlbWVfY29sb3IiOiAiIzNiODJmNiIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU1USTRJaUJvWldsbmFIUTlJakV5T0NJZ2RtbGxkMEp2ZUQwaU1DQXdJREV5T0NBeU9DSWdabWxzYkQwaUl6TmlPREptTmlJZ2VHMXNibk05SW1oMGRIQTZMeTkzZDNjdWR6TXViM0puTHpJd01EQXZjM1puSWo0OGNtVmpkQ0IzYVdSMGFEMGlNVEk0SWlCb1pXbG5hSFE5SWpFeU9DSWdabWxzYkQwaUkwWkdSa1pHUmlJdmVqNDhkR1Y0ZENCNFBTSTJOQ0lnZVQwaU5qUWlJSFJsZUhRdFlXNWphRzl5UFNKdGFXUmtiR1VpSUdacGJHdzlJaU5tWm1ZaUlHWnZiblF0YzJsNlpUMGlORGdpUGpOOEwyUmxabUU4TDNSbGVIUStQQzl6ZG1jKyIsCiAgICAgICJzaXplcyI6ICIxMjh4MTI4IiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTWpVMklpQm9aV2xuYUhROUlqSTFOaUlnZG1sbGQwSnZlRDBpTUNBd0lESTFOaUF5TlRZaUlHWnBiR3c5SWlNell6Z3laalppSUhodGJHNXpQU0pvZEhSd09pOHZkM2QzTG5jekxtOXlaeTh5TURBd0wzTjJaeUkrUEhKbFkzUWdkMmxrZEdnOUlqSTFOaUlnYUdWcFoyaDBQU0l5TlRZaUlHWnBiR3c5SWlOR1JrWkdSbVlpTDNvK1BIUmxlSFFnZUQwaU1USTRJaUI1UFNJeE1qZ2lJSFJsZUhRdFlXNWphRzl5UFNKdGFXUmtiR1VpSUdacGJHdzlJaU5tWm1ZaUlHWnZiblF0YzJsNlpUMGlOalFpUGpOOEwyUmxabUU4TDNSbGVIUStQQzl6ZG1jKyIsCiAgICAgICJzaXplcyI6ICIyNTZ4MjU2IiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0KICBdCn0=">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; 
+        }
+        .tab-active {
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+        .install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- PWA 설치 안내 -->
+    <div id="installPrompt" class="install-prompt">
+        <div class="flex items-center gap-3">
+            <span>📱 앱으로 설치하시겠어요?</span>
+            <button id="installBtn" class="bg-white text-blue-600 px-3 py-1 rounded text-sm font-medium">설치</button>
+            <button id="dismissBtn" class="text-white/80 text-sm">나중에</button>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- 헤더 -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">3줄 성장 노트</h1>
+            <p class="text-gray-600">매일 3줄로 성장을 기록하고 분석해보세요</p>
+            <div id="onlineStatus" class="mt-2 text-sm text-green-600">🟢 온라인</div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="flex">
+                <button id="writeTab" class="flex-1 py-4 px-6 text-center font-medium tab-active">
+                    오늘 기록하기
+                </button>
+                <button id="historyTab" class="flex-1 py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700">
+                    기록 보기
+                </button>
+                <button id="statsTab" class="flex-1 py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700">
+                    통계 분석
+                </button>
+            </div>
+        </div>
+
+        <!-- 기록 작성 탭 -->
+        <div id="writeSection" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">오늘의 3줄 기록</h2>
+                <div class="text-sm text-gray-500" id="todayDate"></div>
+            </div>
+
+            <form id="noteForm" class="space-y-6">
+                <div class="border border-green-200 rounded-lg p-4 bg-green-50">
+                    <label class="block text-sm font-medium text-green-800 mb-2">
+                        오늘 내가 한 일 중 가장 잘한 것 1가지
+                    </label>
+                    <textarea id="goodThing" class="w-full p-3 border border-green-200 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none bg-white" rows="3" placeholder="예: 운동을 30분 꾸준히 했다"></textarea>
+                </div>
+
+                <div class="border border-orange-200 rounded-lg p-4 bg-orange-50">
+                    <label class="block text-sm font-medium text-orange-800 mb-2">
+                        오늘 내가 한 일 중 가장 아쉬웠던 것 1가지
+                    </label>
+                    <textarea id="regretThing" class="w-full p-3 border border-orange-200 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none bg-white" rows="3" placeholder="예: 스마트폰을 너무 많이 봤다"></textarea>
+                </div>
+
+                <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                    <label class="block text-sm font-medium text-blue-800 mb-2">
+                        내일 개선할 1가지 행동
+                    </label>
+                    <textarea id="improveThing" class="w-full p-3 border border-blue-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white" rows="3" placeholder="예: 아침에 일찍 일어나서 독서하기"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-md font-medium hover:bg-blue-700 transition-colors">
+                    오늘의 기록 저장하기
+                </button>
+            </form>
+        </div>
+
+        <!-- 기록 보기 탭 -->
+        <div id="historySection" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-900">나의 성장 기록</h2>
+                <div class="flex gap-2">
+                    <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors">
+                        내보내기
+                    </button>
+                    <button id="clearBtn" class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors">
+                        전체 삭제
+                    </button>
+                </div>
+            </div>
+            <div id="historyList" class="space-y-4"></div>
+        </div>
+
+        <!-- 통계 분석 탭 -->
+        <div id="statsSection" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">성장 통계 분석</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-gray-900" id="totalDays">0</div>
+                    <div class="text-sm text-gray-600 mt-1">총 기록 일수</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-gray-900" id="weekStreak">0</div>
+                    <div class="text-sm text-gray-600 mt-1">연속 기록 (일)</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg text-center">
+                    <div class="text-2xl font-bold text-gray-900" id="monthlyAvg">0</div>
+                    <div class="text-sm text-gray-600 mt-1">월평균 기록</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">주간 기록 현황</h3>
+                    <canvas id="weeklyChart" width="400" height="200"></canvas>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">월간 기록 현황</h3>
+                    <canvas id="monthlyChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">자주 나타나는 키워드</h3>
+                <div id="keywordAnalysis" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PWA 관련 변수
+        let deferredPrompt;
+        let isInstalled = false;
+
+        // 서비스 워커 등록
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript;base64,Y29uc3QgQ0FDSEVfTkFNRSA9ICdncm93dGgtbm90ZS12MSc7CmNvbnN0IHVybHNUb0NhY2hlID0gWwogICcuLycsCiAgJ2h0dHBzOi8vY2RuLnRhaWx3aW5kY3NzLmNvbS8nLAogICdodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2NoYXJ0LmpzJwpdOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4gewogIGV2ZW50LndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFX05BTUUpCiAgICAgIC50aGVuKGNhY2hlID0+IGNhY2hlLmFkZEFsbCh1cmxzVG9DYWNoZSkpCiAgKTsKfSk7CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJywgZXZlbnQgPT4gewogIGV2ZW50LnJlc3BvbmRXaXRoKAogICAgY2FjaGVzLm1hdGNoKGV2ZW50LnJlcXVlc3QpCiAgICAgIC50aGVuKHJlc3BvbnNlID0+IHsKICAgICAgICBpZiAocmVzcG9uc2UpIHsKICAgICAgICAgIHJldHVybiByZXNwb25zZTsKICAgICAgICB9CiAgICAgICAgcmV0dXJuIGZldGNoKGV2ZW50LnJlcXVlc3QpOwogICAgICB9KQogICk7Cn0pOw==')
+                .then(() => console.log('Service Worker 등록 완료'))
+                .catch(err => console.log('Service Worker 등록 실패:', err));
+        }
+
+        // PWA 설치 프롬프트 처리
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // 이미 설치된 상태가 아니면 설치 프롬프트 표시
+            if (!isInstalled) {
+                document.getElementById('installPrompt').style.display = 'block';
+            }
+        });
+
+        // 설치 버튼 클릭
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    console.log('PWA 설치됨');
+                    isInstalled = true;
+                }
+                
+                deferredPrompt = null;
+                document.getElementById('installPrompt').style.display = 'none';
+            }
+        });
+
+        // 나중에 버튼 클릭
+        document.getElementById('dismissBtn').addEventListener('click', () => {
+            document.getElementById('installPrompt').style.display = 'none';
+        });
+
+        // 앱이 설치된 후 실행될 때
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA가 설치되었습니다');
+            isInstalled = true;
+            document.getElementById('installPrompt').style.display = 'none';
+        });
+
+        // 온라인/오프라인 상태 표시
+        function updateOnlineStatus() {
+            const statusElement = document.getElementById('onlineStatus');
+            if (navigator.onLine) {
+                statusElement.textContent = '🟢 온라인';
+                statusElement.className = 'mt-2 text-sm text-green-600';
+            } else {
+                statusElement.textContent = '🔴 오프라인';
+                statusElement.className = 'mt-2 text-sm text-red-600';
+            }
+        }
+
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+
+        // 데이터 저장소
+        let notes = JSON.parse(localStorage.getItem('growthNotes') || '[]');
+
+        // DOM 요소들
+        const writeTab = document.getElementById('writeTab');
+        const historyTab = document.getElementById('historyTab');
+        const statsTab = document.getElementById('statsTab');
+        const writeSection = document.getElementById('writeSection');
+        const historySection = document.getElementById('historySection');
+        const statsSection = document.getElementById('statsSection');
+        const noteForm = document.getElementById('noteForm');
+        const todayDate = document.getElementById('todayDate');
+
+        // 오늘 날짜 표시
+        function updateTodayDate() {
+            const today = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                weekday: 'long' 
+            };
+            todayDate.textContent = today.toLocaleDateString('ko-KR', options);
+        }
+
+        // 탭 전환
+        function switchTab(activeTab, activeSection) {
+            // 모든 탭 비활성화
+            [writeTab, historyTab, statsTab].forEach(tab => {
+                tab.className = 'flex-1 py-4 px-6 text-center font-medium text-gray-500 hover:text-gray-700';
+            });
+            
+            // 활성 탭 스타일 적용
+            activeTab.className = 'flex-1 py-4 px-6 text-center font-medium tab-active';
+            
+            // 모든 섹션 숨기기
+            [writeSection, historySection, statsSection].forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // 활성 섹션 보이기
+            activeSection.classList.remove('hidden');
+        }
+
+        // 이벤트 리스너
+        writeTab.addEventListener('click', () => switchTab(writeTab, writeSection));
+        historyTab.addEventListener('click', () => {
+            switchTab(historyTab, historySection);
+            displayHistory();
+        });
+        statsTab.addEventListener('click', () => {
+            switchTab(statsTab, statsSection);
+            displayStats();
+        });
+
+        // 노트 저장
+        noteForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const goodThing = document.getElementById('goodThing').value.trim();
+            const regretThing = document.getElementById('regretThing').value.trim();
+            const improveThing = document.getElementById('improveThing').value.trim();
+            
+            if (!goodThing || !regretThing || !improveThing) {
+                alert('모든 항목을 작성해주세요!');
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            // 오늘 이미 작성했는지 확인
+            const existingIndex = notes.findIndex(note => note.date === today);
+            
+            const newNote = {
+                date: today,
+                goodThing,
+                regretThing,
+                improveThing,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (existingIndex >= 0) {
+                notes[existingIndex] = newNote;
+                alert('오늘의 기록이 수정되었습니다!');
+            } else {
+                notes.push(newNote);
+                alert('오늘의 기록이 저장되었습니다!');
+            }
+            
+            localStorage.setItem('growthNotes', JSON.stringify(notes));
+            noteForm.reset();
+        });
+
+        // 기록 히스토리 표시
+        function displayHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (notes.length === 0) {
+                historyList.innerHTML = '<div class="text-center text-gray-500 py-8">아직 기록이 없습니다. 첫 번째 기록을 작성해보세요!</div>';
+                return;
+            }
+            
+            const sortedNotes = [...notes].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            historyList.innerHTML = sortedNotes.map(note => {
+                const date = new Date(note.date);
+                const formattedDate = date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short'
+                });
+                
+                return `
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-medium text-gray-900">${formattedDate}</h3>
+                            <button onclick="deleteNote('${note.date}')" class="text-red-600 hover:text-red-800 text-sm">삭제</button>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="bg-green-50 border border-green-200 p-3 rounded">
+                                <div class="text-sm font-medium text-green-800 mb-1">잘한 것</div>
+                                <div class="text-gray-700 text-sm">${note.goodThing}</div>
+                            </div>
+                            <div class="bg-orange-50 border border-orange-200 p-3 rounded">
+                                <div class="text-sm font-medium text-orange-800 mb-1">아쉬웠던 것</div>
+                                <div class="text-gray-700 text-sm">${note.regretThing}</div>
+                            </div>
+                            <div class="bg-blue-50 border border-blue-200 p-3 rounded">
+                                <div class="text-sm font-medium text-blue-800 mb-1">개선할 것</div>
+                                <div class="text-gray-700 text-sm">${note.improveThing}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 노트 삭제
+        function deleteNote(date) {
+            if (confirm('이 기록을 삭제하시겠습니까?')) {
+                notes = notes.filter(note => note.date !== date);
+                localStorage.setItem('growthNotes', JSON.stringify(notes));
+                displayHistory();
+            }
+        }
+
+        // 통계 표시
+        function displayStats() {
+            updateBasicStats();
+            createWeeklyChart();
+            createMonthlyChart();
+            analyzeKeywords();
+        }
+
+        // 기본 통계 업데이트
+        function updateBasicStats() {
+            document.getElementById('totalDays').textContent = notes.length;
+            
+            // 연속 기록 계산
+            const sortedDates = notes.map(note => note.date).sort();
+            let streak = 0;
+            let currentStreak = 0;
+            
+            for (let i = sortedDates.length - 1; i >= 0; i--) {
+                const date = new Date(sortedDates[i]);
+                const today = new Date();
+                const diffDays = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === currentStreak) {
+                    streak++;
+                    currentStreak++;
+                } else {
+                    break;
+                }
+            }
+            
+            document.getElementById('weekStreak').textContent = streak;
+            
+            // 월평균 계산
+            const monthlyAvg = notes.length > 0 ? Math.round(notes.length / Math.max(1, getMonthsSpan())) : 0;
+            document.getElementById('monthlyAvg').textContent = monthlyAvg;
+        }
+
+        // 월 범위 계산
+        function getMonthsSpan() {
+            if (notes.length === 0) return 1;
+            
+            const dates = notes.map(note => new Date(note.date));
+            const minDate = new Date(Math.min(...dates));
+            const maxDate = new Date(Math.max(...dates));
+            
+            return Math.max(1, (maxDate.getFullYear() - minDate.getFullYear()) * 12 + maxDate.getMonth() - minDate.getMonth() + 1);
+        }
+
+        // 주간 차트 생성
+        function createWeeklyChart() {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            
+            // 최근 4주 데이터
+            const weeks = [];
+            const today = new Date();
+            
+            for (let i = 3; i >= 0; i--) {
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - (i * 7) - today.getDay());
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                const weekNotes = notes.filter(note => {
+                    const noteDate = new Date(note.date);
+                    return noteDate >= weekStart && noteDate <= weekEnd;
+                });
+                
+                weeks.push({
+                    label: `${weekStart.getMonth() + 1}/${weekStart.getDate()}`,
+                    count: weekNotes.length
+                });
+            }
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: weeks.map(w => w.label),
+                    datasets: [{
+                        label: '기록 수',
+                        data: weeks.map(w => w.count),
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 7
+                        }
+                    }
+                }
+            });
+        }
+
+        // 월간 차트 생성
+        function createMonthlyChart() {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            
+            // 최근 6개월 데이터
+            const months = [];
+            const today = new Date();
+            
+            for (let i = 5; i >= 0; i--) {
+                const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                const monthEnd = new Date(today.getFullYear(), today.getMonth() - i + 1, 0);
+                
+                const monthNotes = notes.filter(note => {
+                    const noteDate = new Date(note.date);
+                    return noteDate >= month && noteDate <= monthEnd;
+                });
+                
+                months.push({
+                    label: `${month.getMonth() + 1}월`,
+                    count: monthNotes.length
+                });
+            }
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months.map(m => m.label),
+                    datasets: [{
+                        label: '기록 수',
+                        data: months.map(m => m.count),
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 2,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // 키워드 분석
+        function analyzeKeywords() {
+            const keywordAnalysis = document.getElementById('keywordAnalysis');
+            
+            if (notes.length === 0) {
+                keywordAnalysis.innerHTML = '<div class="col-span-full text-center text-gray-500 py-4">분석할 데이터가 없습니다.</div>';
+                return;
+            }
+            
+            // 모든 텍스트 합치기
+            const allText = notes.map(note => 
+                `${note.goodThing} ${note.regretThing} ${note.improveThing}`
+            ).join(' ');
+            
+            // 간단한 키워드 추출 (한글 2글자 이상)
+            const words = allText.match(/[가-힣]{2,}/g) || [];
+            const wordCount = {};
+            
+            words.forEach(word => {
+                wordCount[word] = (wordCount[word] || 0) + 1;
+            });
+            
+            // 상위 8개 키워드
+            const topWords = Object.entries(wordCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+            
+            keywordAnalysis.innerHTML = topWords.map(([word, count]) => `
+                <div class="bg-white border border-gray-200 p-3 rounded text-center">
+                    <div class="font-medium text-gray-900">${word}</div>
+                    <div class="text-sm text-gray-500">${count}회</div>
+                </div>
+            `).join('');
+        }
+
+        // 데이터 내보내기
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const dataStr = JSON.stringify(notes, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `성장노트_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // 전체 삭제
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (confirm('정말로 모든 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                notes = [];
+                localStorage.removeItem('growthNotes');
+                displayHistory();
+                alert('모든 기록이 삭제되었습니다.');
+            }
+        });
+
+        // 페이지 로드 시 오늘 기록이 있는지 확인
+        function checkTodayNote() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayNote = notes.find(note => note.date === today);
+            
+            if (todayNote) {
+                document.getElementById('goodThing').value = todayNote.goodThing;
+                document.getElementById('regretThing').value = todayNote.regretThing;
+                document.getElementById('improveThing').value = todayNote.improveThing;
+            }
+        }
+
+        // 초기화
+        updateTodayDate();
+        checkTodayNote();
+        updateOnlineStatus();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'980466ce11e6d1e6',t:'MTc1ODA2ODA0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
